@@ -1,0 +1,202 @@
+body {
+	background-color: white;
+	color: black;
+	font-family: arial, helvetica;
+	font-size: 10pt;
+}
+
+body.menu {
+        background-color: white;
+	color: black;
+        font-family : arial, helvetica;
+        font-size: 8pt;
+}
+
+body.margin {
+        background-color: white;
+	color: black;
+        font-family : arial, helvetica;
+        font-size: 10pt;
+        margin-left: 10%;
+        margin-right: 10%;
+}
+
+a:link {
+	text-decoration: none;
+}
+
+a:visited {
+	text-decoration: none; 
+	color: blue;
+}
+
+a:active {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline overline; 
+	color: green;
+}
+
+table {
+	padding: 0;
+	margin: 0;
+}
+
+blockquote {
+	padding-top: 0;
+	padding-bottom: 0;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+table.center {
+	margin-left:auto; 
+	margin-right:auto;
+}
+
+hr.sep {
+	border-top: 1px solid #ddd;
+	border-bottom: 0px;
+	height: 1px;
+}
+
+hr.dashsep {
+	border-top: 1px dashed #ddd;
+	border-bottom: 0px;
+	height: 1px;
+}
+
+.vspace {
+	height: 40px;
+	border: 0px;
+}
+
+.mdate {
+	color: #AA0000;
+}
+
+.date {
+	color: #AA0000;
+	padding: 1px;
+	font-family : arial, helvetica;
+	font-size: 70%;
+}
+
+tt {
+	font-family: verdana;
+	font-size: 80%;
+        font-weight: bold;
+}                        
+
+div.blue {
+	color: blue;
+	font-family : arial, helvetica;
+	font-size: 70%;
+}
+
+div.indent {
+	padding-left: 4ex;
+}
+
+code {
+	font-family : "Lucida Console", Courier, "Courier New", monospace;
+	/*background: rgb(240, 240, 240);
+	padding-left: .5em;
+	padding-right: .5em;
+	border-radius: 1em;*/
+        /*font-size: 90%;
+	color: #0000AA;
+        border-radius: 0%;*/
+        /*background-color: #eeeeee;*/
+        /*padding-left: 1ex;
+        padding-right: 1ex;
+        padding-top: 2pt;
+        padding-bottom: 2pt;*/
+        /*font-weight: bold;*/
+}                        
+
+
+pre.code {
+        /*font-size: 10px;*/
+	font-family : "Lucida Console", Courier, "Courier New", monospace;
+}                        
+
+.kword {
+	color: blue;
+}
+
+.pykword {
+	color: orange;
+        font-weight: bold;
+}
+
+.pykword2 {
+	color: MediumOrchid;
+        font-weight: bold;
+}
+
+.cmnt {
+	color: green;
+}
+
+.pycmnt {
+	color: red;
+}
+
+.str {
+	color: maroon;
+}
+
+.pystr {
+	color: green;
+}
+
+.redemph {
+	color: red;
+}
+
+.graybg {
+	background-color: #dddddd;
+}
+
+.codepara {
+	font-family: "Lucida Console", Courier, "Courier New", monospace;
+	font-size: 10pt;
+	margin: 0ex;
+	padding-left: 4ch; 
+}
+
+.codebox {
+	font-family: "Lucida Console", Courier, "Courier New", monospace;
+	background-color: #ccffff; 
+	border: solid 1px; 
+	padding: 2ch;
+        margin-bottom: -1ch;
+	margin-top: 0ch;
+}
+
+.emphbox {
+	font-family: "Lucida Console", Courier, "Courier New", monospace;
+	background-color: #ffffcc; 
+	border: solid 1px; 
+	padding: 1ch; 
+	margin-bottom: -1ch;
+	margin-top: 0ch;
+        width: auto;
+}
+
+.parabox {
+	font-family: "Lucida Console", Courier, "Courier New", monospace;    
+	background-color: #eeeeee; 
+	border: solid 1px; 
+	padding: 2ch;
+        margin-bottom: -1ch;
+	margin-top: 0ch;
+}
+
+.strike {
+	text-decoration: line-through;	
+	color: red;	
+}
