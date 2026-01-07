@@ -10,9 +10,17 @@ using namespace std;
 
 class ArmToHack {
 public:
-    ArmToHack();
-    void reset();
-    void translate(string in_filename, string out_filename);
+    ArmToHack() {
+        // Constructor: Initialize register map here
+    }
+
+    void reset() {
+        // Clear data members
+    }
+
+    void translate(string in_filename, string out_filename) {
+        // Main entry point for translation
+    }
 
 private:
     // File streams
@@ -29,12 +37,29 @@ private:
     map<int, string> hack_to_arm_label_map; // Maps Hack lines to ARM labels (for full jumps)
 
     // Helper methods
-    void translateFirstPass(string in_filename, string out_filename);
-    void translateLine(string line);
-    void translateInstruction(string line); // translateXXX in description
-    void translateJumps(string line);
-    void write_line(string line);
-    void write_oper2(string token);
+    void translateFirstPass(string in_filename, string out_filename) {
+        // First pass implementation
+    }
+    
+    void translateLine(string line) {
+        // Dispatcher
+    }
+
+    void translateInstruction(string line) {
+        // Core translation logic (MOV, ADD, etc.)
+    }
+
+    void translateJumps(string line) {
+        // Jump handling
+    }
+
+    void write_line(string line) {
+        // Write to output file
+    }
+    
+    void write_oper2(string token) {
+        // Handle numeric constants
+    }
 };
 
 #endif // ARMTOHACK_H
