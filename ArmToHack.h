@@ -15,50 +15,40 @@ public:
     }
 
     void reset() {
-        // Clear data members
+        // Clears the relevant data members in preparation for another translation
     }
 
     void translate(string in_filename, string out_filename) {
-        // Main entry point for translation
+        // For now mostly calls translateFirstPass
     }
 
 private:
-    // File streams
+    // data members
     ifstream input_stream;
     ofstream output_stream;
 
-    // Current line number in Hack program
-    int hack_line_number;
+    // curr line number in HACK program
+    int line_number;
 
-    // Lookup tables
-    map<string, int> register_map;
-    map<string, string> jump_map;
-    map<string, int> label_map; // Maps ARM labels to Hack line numbers
-    map<int, string> hack_to_arm_label_map; // Maps Hack lines to ARM labels (for full jumps)
+    // lookup table 1: Hash Map for associating registers with their addresses in RAM
+    map<string, int> reg_map;
 
-    // Helper methods
-    void translateFirstPass(string in_filename, string out_filename) {
-        // First pass implementation
-    }
-    
-    void translateLine(string line) {
-        // Dispatcher
-    }
-
-    void translateInstruction(string line) {
-        // Core translation logic (MOV, ADD, etc.)
-    }
-
-    void translateJumps(string line) {
-        // Jump handling
-    }
-
+    // methods
     void write_line(string line) {
-        // Write to output file
+        // Writes a single complete line of Hack Assembly.
     }
     
-    void write_oper2(string token) {
-        // Handle numeric constants
+    void translateFirstPass(string in_filename, string out_filename) {
+        // Opens the two streams with the given filenames and carries out the translation.
+    }
+    
+    void translate(string line) {
+        // Simply dispatches to the relevant translator for the given line.
+    }
+
+    void translateXXX(string line) {
+        // Translates the given line, which is an ARM Assembly instruction
+        // Supports: MOV, ADD, SUB, RSB, CMP, END
     }
 };
 
