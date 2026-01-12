@@ -10,7 +10,7 @@ int main() {
     // Example usage:
     // translator.translate("test/program1.arm", "test/program1.asm");
     
-    cout << "ArmToHack Translator initialized." << endl;
+    cout << "Starting ArmToHackASM Translator." << endl;
 
     return 0;
 }
