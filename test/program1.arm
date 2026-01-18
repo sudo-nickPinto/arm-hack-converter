@@ -1,0 +1,3 @@
+MOV R1, R0
+MOV R2, R1
+END

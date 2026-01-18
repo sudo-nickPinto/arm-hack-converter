@@ -1,0 +1,3 @@
+RSB R3, R1, R2
+CMP R0, R1
+END
