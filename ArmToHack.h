@@ -118,6 +118,8 @@ private:
             // modification of this method !
             // check if this line is a label
             // labels have no second token, except END which is also single-token
+            // label (not end) = store in map and continue
+            // no label or END = translate
             string first = peek_first(line);
             string second = peek_second(line);
             if (second.empty() && first != "END") {
@@ -139,6 +141,8 @@ private:
         string opcode = peek_first(line);
         
         // check if it's a branch instruction
+        // if branch instruction (exists in map) -> translate jumps
+        // if no, call translateXXX
         if (jump_map.contains(opcode)) {
             translateJumps(line);
         }

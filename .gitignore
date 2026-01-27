@@ -1,0 +1,11 @@
+# Build outputs
+translator
+translator_tests
+*.dSYM/
+
+# Generated Hack assembly outputs
+/test/*.asm
+/test/tmp/
+
+# macOS
+.DS_Store
