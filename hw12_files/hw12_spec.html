@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+ <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+ <title>Assignments for CS 221, Fall 2025</title>
+ <link rel="stylesheet" href="../css/generic.css" type="text/css" />
+</head>
+
+
+<body class="margin">
+
+<div style="text-align: center;">
+  <img src="../images/logo.gif" alt="Gettysburg College" /><br />
+  <h2>
+  CS 221<br />
+  Computer Organization and Assembly Language Programming
+  </h2>
+  Fall 2025<br/>
+
+  <hr class="sep" />
+
+  <div style="text-align: center ;">
+  <h2>Assignment 12</h2>
+
+  <b>Due: Thu, Dec 11, by 11:59pm</b>
+  </div>
+
+  <div class="vspace"></div>
+
+</div>
+
+
+<!--*********** Assignments *************-->
+
+
+
+<div>
+
+<h2>Readings</h2>
+
+<ul>
+<li>Assembler:
+<p />
+<ul>
+<li>N2T: Chapter 6 All (slides All)</li>
+<li>N2T: Chapter 4 as needed, mostly contained in Chapter 6</li>
+<li>ARM Reference: <a target="_blank" href="../handouts/ARM_QR.pdf">ARM Quick Reference</a></li>
+</ul>
+<p /></li>
+</ul>
+  
+<h2>Description and Testing</h2>
+
+This is a continuation of Assignment 11. The goal is to add functionality for stack manipulation and user defined variables/arrays.
+
+<h2>Separate Files</h2>
+
+Organize the code into separate files:
+<p />
+<ul>
+<li><b><code>ArmToHack.h</code></b>: contains the class with method signatures</li>
+<li><b><code>ArmToHack.cpp</code></b>: contains the method implementations</li>
+</ul>
+
+Here is an example:
+<p />
+<blockquote>
+<a target="_blank" href="a12-files/Student.h.html">Student.h</a> | <a target="_blank" href="a12-files/Student.cpp.html">Student.cpp</a> | <a target="_blank" href="a12-files/main.cpp.html">main.cpp</a>
+</blockquote>
+
+
+<h2>ArmToHack Translator (Stack)</h2>
+
+Each translated program should start by initializing the <code>Stack</code> to
+the appropriate address in <code>Memory</code> so that the stack behaves as in
+our earlier setup for ARM. (The user may change that value later, but it
+should start with the expected value.)
+
+<h2>ArmToHack Translator (Basic LDMIB and STMDA)</h2>
+
+Add support for basic <code>LDMIB</code> and <code>STMDB</code>. To simplify, for now assume that the register list has a single entry:
+<p />
+<blockquote>
+<code>STMDA Rn!, {R7}</code><br />
+<code>LDMIB Rn!, {R7}</code>
+</blockquote>
+<p />
+Here are sample test programs. The first writes three registers on the stack, the second reads three values from the stack.
+<p />
+For convenience each changes the default value of <code>SP</code> and sets it closer to the the top. What should be the value of <code>SP</code> when the first program is done? the second?
+<p />
+<blockquote>
+<a target="_blank" href="a12-files/program11.arm">program11.arm</a> (should
+see <code>12,13,11</code> in cells <b style="color:red"><code>20,19,18</code></b>)<p />
+<a target="_blank" href="a12-files/program12.arm">program12.arm</a> (should
+see <b style="color:red"><code>R1=11,R2=12,R3=13</code></b>)
+</blockquote>
+
+<h2>ArmToHack Translator (Full LDMIB and STMDA)</h2>
+
+Add support for <code>LDMIB</code> and <code>STMDB</code> with multi-entry register list. The ARM user will be expected to list the registers in the same order for related <code>STMDA</code> and <code>LDMIB</code> instructions (for example saving and restoring registers for a function call).
+<p />
+<blockquote>
+<code>STMDA Rn!, {R7, R2, R11}</code><br />
+<code>LDMIB Rn!, {R7, R2, R11}</code>
+</blockquote>
+<p />
+Here are sample test programs. The first writes three registers on the stack, the second reads three values from the stack.
+<p />
+For convenience each changes the default value of <code>SP</code> and sets it closer to the top. What should be the value of <code>SP</code> when the first program is done? the second?
+<p />
+<blockquote>
+<a target="_blank" href="a12-files/program13.arm">program13.arm</a> |
+<a target="_blank" href="a12-files/program14.arm">program14.arm</a>
+</blockquote>
+
+<h2>ArmToHack Translator (LDR and STR)</h2>
+
+Add support for <code>LDR</code> and <code>STR</code>:
+<p />
+<blockquote>
+<code>STR Rs, [Rb, Ri, LSL #2]</code><br />
+<code>LDR Rd, [Rb, Ri, LSL #2]</code>
+<p />
+<code>STR Rs, [Rb, #&pm;N]</code><br />
+<code>LDR Rd, [Rb, #&pm;N]</code>
+</blockquote>
+<p />
+Here <code>Rb</code> is the base register and <code>Ri</code> is the index
+which may also be a numeric value (i.e. Operand2). The <code>LSL</code> will
+be ignored, since the Hack alignment is on individual cells, not the 4 bytes
+of ARM.
+<p />
+<blockquote>
+<a target="_blank" href="a12-files/program15.arm">program15.arm</a> (should see <code>R7=42</code>)<p />
+<a target="_blank" href="a12-files/program16.arm">program16.arm</a> (should see <code>R3=42, R4=24, R5=66</code>)<p />
+<a target="_blank" href="a12-files/program17.arm">program17.arm</a> (should see 42 in cell 19)<p /> 
+<a target="_blank" href="a12-files/program18.arm">program18.arm</a> (should see 42, 24, 66 in cells 18,19,20)
+</blockquote>
+
+<p />
+
+<h2>Defined Variables</h2>
+
+Add support for user defined arrays/variables.
+<p />
+<blockquote>
+<code>numbers DCD 1, +2, -3</code><br />
+<code>value DCD 4</code>
+</blockquote>
+<p />
+All user defined variables will start immediately after the registers, i.e. from index 16.
+<p />
+Each value will be allocated just one Hack cell. In the above example, the array <code>numbers</code> will occupy cells <code>16-18</code> and the array <code>value</code> will occupy cells <code>19</code>.
+<p />
+<blockquote>
+<a target="_blank" href="a12-files/program19.arm">program19.arm</a> (should see <code>1..4</code> in cells <code>16..19</code>)<p />
+<a target="_blank" href="a12-files/program20.arm">program20.arm</a> (should see <code>1..8</code> in cells <code>16..23</code>)<p />
+</blockquote>
+
+<p />
+
+<h2>Defined Variables and LDR</h2>
+
+Extend the definition of <code>LDR</code> to include the option of loading the base of an array:
+<p />
+<blockquote>
+<code>LDR Rd, =array</code>
+</blockquote>
+<p />
+This will require another lookup table to store the base of each array. In the above example, the base of array <code>numbers</code> is <code>16</code> and the base of array <code>value</code> is <code>19</code>.
+<p />
+<blockquote>
+<a target="_blank" href="a12-files/program21.arm">program21.arm</a> (should see <code>4,2,-3,1</code> in cells <code>16..19</code>)<p />
+<a target="_blank" href="a12-files/program22.arm">program22.arm</a> (should see <code>1,4,5,5,4,5,7</code> in registers <code>R4..R10</code>)<p />
+</blockquote>
+
+<h2>ASR Instruction (R0,R1 only)</h2>
+
+Add support for the <code>ASR</code> instruction (<i>Arithmetic Shift Right</i>) but only for 1 shift. This effectively performs division by 2.
+<p />
+<blockquote>
+<code>ASR DestReg, RegToShift, #1</code><br />
+</blockquote>
+<p />
+To accomplish this, write a mini-program in Hack Assembly that keeps subtracting 2 from <code>R0</code> until we cannot subract 2 anymore from <code>R0</code>. Along the way keep track in <code>R1</code> how many times the program ran. (Think of this as if it was assigned as a Hack programming problem in Assignment 10.)
+<p />
+Once you have the mini-program, write its source code for <code>ASR</code>. This is the same as writing, for example, the source code for the mini-program for <code>MOV</code> from class, but the mini-program for <code>MOV</code> had fewer instructions (<code>MOV R2, R7</code> becomes <code>@7;D=M;@2;M=D</code>).
+<p />
+Test with the following program. However, before running in CPU Emulator,
+manually put a value in cell 0 and look for the result in cell 1 (try even  and odd number):
+<blockquote>
+<a target="_blank" href="a12-files/programASR1.arm">programASR1.arm</a> (should see in cell <code>1</code> the value from cell <code>0</code> divided by 2)<p />
+</blockquote>
+<p />
+Note that the Hack Assembly code should only have the instructions of the mini-program, so this can serve as a simple test whether things were written out correctly.
+
+<h2>ASR Instruction (Stack)</h2>
+
+Rewrite the mini-program for <code>ASR</code> to use the two cells on top of the stack instead of <code>R0,R1</code>. Note that the mini-program is part of <code>ASR</code>, but it only does the computation based on what is on the stack, so getting things ready for the mini-program and any follow-up actions is done by <code>ASR</code>.
+<p />
+To simplify the code, there is no need to claim and release the two working cells on the stack, i.e. there is no need to move <code>SP</code> up and down. Use the first cell on top of the stack to serve the purpose of <code>R0</code> and the cell on top of it for <code>R1</code>. (Where does <code>SP</code> point in our ARM convention?)
+<p />
+Test with the following program. Again, manually put a number in cell 5 and cell 8; should see the results in cells 3 and 9:
+<p />
+<blockquote>
+<a target="_blank" href="a12-files/programASR2.arm">programASR2.arm</a> (should see in cells <code>3,9</code> the values from cells <code>5,8</code> divided by 2)
+</blockquote>
+<p />
+Note that the Hack Assembly code should only have the instructions of two mini-program one after the other, so this can serve as a simple test whether things were written out correctly. Check the jumps.
+<p />
+Test with the following program. This time do not put numbers manually, since they are part of the program:
+<p />
+<blockquote>
+<a target="_blank" href="a12-files/programASR3.arm">programASR3.arm</a> (should see <code>6,4,5</code> in cells <code>3,9,10</code>)<p />
+</blockquote>
+
+<h2>Final Test (program23)</h2>
+
+Convert the following program and execute it on the Computer.
+<p />
+Upload a screenshot named <b>program23.png</b> of Hardware Simulator / CPU Emulator that shows the contents of the RAM.
+<p />
+<blockquote>
+<a target="_blank" href="a12-files/program23.arm">program23.arm</a> (should see <code>1,3,6,10,15,21</code> in cells <code>22..27</code>)
+</blockquote>
+
+<!--h2>Final Test 2 (Binary Search)</h2>
+
+Skip this section if you do not have a working <b>bianrySearch.arm</b> from
+Assignment 8.
+<p />
+Convert <b>binarySearch.aarm</b> and execute it on the Computer.
+<p />
+Upload a screenshot named <b>binarySearch.png</b> of Hardware Simulator / CPU
+Emulator that shows the contents of the RAM for this test configuration:
+<p />
+<blockquote>
+<code>numbers: 1,3,6,10,15,21,22,24,25,30</code><br/>
+<code>value: 22</code>
+</blockquote-->
+
+</div>
+
+<p />
+
+<hr class="sep" />
+
+<div>
+<h2>What to turn in</h2>
+
+Upload <code>ArmToHack.h</code>, <code>ArmToHack.cpp</code>, <code>main.cpp</code>, <code>program23.png</code> to the Moodle dropbox.
+
+</div>
+
+</body>
+</html>
