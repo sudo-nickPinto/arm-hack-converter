@@ -9,3 +9,4 @@ translator_tests
 
 # macOS
 .DS_Store
+*.tmp

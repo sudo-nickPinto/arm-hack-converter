@@ -30,17 +30,23 @@ public:
         jump_map["BGE"] = "JGE";  // branch if greater or equal
         jump_map["BLT"] = "JLT";  // branch if less than
         jump_map["BLE"] = "JLE";  // branch if less or equal
-        jump_map["BAL"] = "JMP";    // unconditional branch
+        jump_map["BAL"] = "JMP";  // unconditional branch
+        jump_map["BL"] = "JMP";   // branch and link (handled specially in translateJumps)
     }
 
     void reset() {
-        // clears data members in preparation for another trnaslation
+        // clears data members in preparation for another translation
         line_number = 0;
         label_map.clear();  // clear labels from previous translation
+        fix_map.clear();  // clear forward jump fix-ups from previous translation
     }
 
     void translate(string in_filename, string out_filename) {
-        translateFirstPass(in_filename, out_filename);
+        // pass 1: translate ARM -> Hack, writing @-1 for unknown forward jumps
+        //      2: fix @-1 placeholders now that all labels are known
+        string tmp_filename = in_filename + ".tmp";
+        translateFirstPass(in_filename, tmp_filename);
+        translateSecondPass(tmp_filename, out_filename);
     }
 
 private:
@@ -64,6 +70,12 @@ private:
     // Hashmap for ARM labels -> Hack line numbers
     map<string, int> label_map;
 
+    // lookup table 4
+    // Hashmap for Hack line numbers -> ARM labels (for forward jumps)
+    // when we encounter a forward jump, we don't know the target yet
+    // we write @-1 as placeholder and record: fix_map[hack_line] = label and then
+    // the second pass will fix these by looking up label_map[label]
+    map<int, string> fix_map;
 
 
     // methods
@@ -96,6 +108,18 @@ private:
             write_line("@" + to_string(addr));
             write_line("D=M");
         }
+    }
+
+    void write_pcjump(string rd_str) {
+        // If destination register is PC (R15 or PC), we need to actually jump
+        // to the value we just stored, since writing to memory doesn't
+        // automatically change execution flow in Hack
+        if (rd_str == "PC" || rd_str == "R15") {
+            write_line("@15");    // Select PC's memory location
+            write_line("A=M");    // Load PC's value into A register
+            write_line("0;JMP");  // Jump to that address
+        }
+        // If destination is not PC, do nothing
     }
     
     void translateFirstPass(string in_filename, string out_filename) {
@@ -136,6 +160,42 @@ private:
         output_stream.close();
     }
 
+    void translateSecondPass(string in_filename, string out_filename) {
+        // second pass: fix forward jump placeholders (@-1)
+        // reads the temp Hack file from pass 1, and fixes any @-1 lines
+        
+        input_stream.open(in_filename);
+        output_stream.open(out_filename);
+        
+        int current_line = 0;
+        
+        while (true) {
+            string line;
+            getline(input_stream, line);
+            
+            // stop if file is completely read
+            if (!input_stream && line.empty()) break;
+            
+            // check if this line needs fixing (is in fix_map)
+            if (fix_map.contains(current_line)) {
+                // this line has @-1, replace with correct address
+                string label = fix_map[current_line];
+                int target_line = label_map[label];
+                output_stream << "@" << target_line << endl;
+            }
+            else {
+                // copy line unchanged (no need for fix; doesn't contain @-1)
+                output_stream << line << endl;
+            }
+            
+            current_line++;
+        }
+        
+        // close streams
+        input_stream.close();
+        output_stream.close();
+    }
+
     // dispatches to the relevant translator for the given line
     void translate(string line) {
         string opcode = peek_first(line);
@@ -158,11 +218,45 @@ private:
         string opcode = extract_token(line);
         string label = extract_token(line);
         
-        // get the hack line number for this label
-        int target_line = label_map[label];
+        // BL case-specifc
+        // BL: save return address to LR first
+        if (opcode == "BL") {
+            // return addr is where execution resumes after BL function call
+            // wrote 6 lines total, so return addr = line_number + 6
+            int return_addr = line_number + 6;
+            
+            // save return address to LR // R14
+            write_line("@" + to_string(return_addr)); // get return addr
+            write_line("D=A"); // copy to D
+            write_line("@14"); // get RAM[14]
+            write_line("M=D"); // store RAM[14] in LR
+            
+            // do the jump
+            if (label_map.contains(label)) { // label known
+                int target_line = label_map[label];
+                write_line("@" + to_string(target_line));
+            }
+            else { // label unknown
+                fix_map[line_number] = label;
+                write_line("@-1");
+            }
+            write_line("0;JMP");
+            return;
+        }
         
-        // load target address into A
-        write_line("@" + to_string(target_line));
+        // regular BXX instructions (BEQ, BNE, BGT, etc.)
+        // check if this is a back jump (label already known) or forward jump (label unknown)
+        if (label_map.contains(label)) {
+            // BACK JUMP: label was defined earlier, we know its address
+            int target_line = label_map[label];
+            write_line("@" + to_string(target_line));
+        }
+        else {
+            // FORWARD JUMP: label hasn't been seen yet
+            // write placeholder @-1 and record this line needs fixing
+            fix_map[line_number] = label;  // hack line X needs label Y
+            write_line("@-1");
+        }
         
         // conditional jump based on D register
         string jump_type = jump_map[opcode];
@@ -189,6 +283,9 @@ private:
              // store D in Rd
              write_line("@" + to_string(rd));
              write_line("M=D");
+             
+             // if destination is PC, jump to the stored value
+             write_pcjump(rd_str);
         }
 
         if (opcode == "ADD") {
@@ -218,6 +315,9 @@ private:
             // M = D
             write_line("@" + to_string(rd));
             write_line("M=D");
+            
+            // if destination is PC, jump to the stored value
+            write_pcjump(rd_str);
         }
 
         if (opcode == "SUB") {
@@ -247,6 +347,9 @@ private:
             // M = D
             write_line("@" + to_string(rd));
             write_line("M=D");
+            
+            // if destination is PC, jump to the stored value
+            write_pcjump(rd_str);
         }
 
         if (opcode == "RSB") {
@@ -287,6 +390,9 @@ private:
             // M = D
             write_line("@" + to_string(rd));
             write_line("M=D");
+            
+            // if destination is PC, jump to the stored value
+            write_pcjump(rd_str);
         }
 
         if (opcode == "CMP") {
