@@ -7,6 +7,9 @@ translator_tests
 /test/*.asm
 /test/tmp/
 
+# AI prompt instructions (private, not for repo)
+.github/prompts/
+
 # macOS
 .DS_Store
 *.tmp
