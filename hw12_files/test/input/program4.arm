@@ -1,0 +1,6 @@
+		MOV		R0, #10
+		ADD		R1, R0, #-5
+		SUB		R2, R1, #2
+		RSB		R3, R2, #-9
+		CMP		R4, #8
+		END

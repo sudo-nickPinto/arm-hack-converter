@@ -1,0 +1,5 @@
+		BL		TESTBL
+		MOV		R0, #1
+		END
+TESTBL
+		ADD		PC, LR, #0

@@ -1,0 +1,11 @@
+		MOV		R0, #5
+		MOV		R1, #0
+		MOV		R2, #1
+LOOP
+		CMP		R2, R0
+		BGT		DONE
+		ADD		R1, R1, R2
+		ADD		R2, R2, #1
+		BAL		LOOP
+DONE
+		END
