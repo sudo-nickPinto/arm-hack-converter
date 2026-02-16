@@ -1,26 +1,44 @@
-# Section 1 — Separate Files
+# Section 1 — Separate Files (Execution Record + Re-evaluation)
 
-## What we changed
-We split the monolithic translator into:
-- `src/ArmToHack.h` → class declaration only
-- `src/ArmToHack.cpp` → method implementations
+## Assignment requirement (from `hw12_spec.html`)
+> Organize the code into separate files:
+> - `ArmToHack.h`: class with method signatures
+> - `ArmToHack.cpp`: method implementations
 
-## Why this is the right design
-- **Separation of interface and implementation**: readers can learn the class API quickly from the header.
-- **Scalability**: HW12 adds many new instructions and helper methods; keeping all code in a header becomes hard to maintain.
-- **Build hygiene**: source files compile once, reducing duplicate compilation work.
+This section is only about project structure and reordering of behavior previous to this implementation
 
-## What stayed the same
-- Existing HW11 behavior for programs 1–10
-- Existing maps (`reg_map`, `jump_map`, `label_map`, `fix_map`)
-- Existing two-pass jump-fix architecture
+---
 
-## Validation
-- Built with `g++ -std=c++20`
-- Ran translator on programs 1–10
-- Diff check shows `hw12_files/test/output` matches `hw11_files/test/output`
+## Exactly what was executed
 
-## Notes
-`main.cpp` paths were aligned to current folder layout:
-- inputs: `test/input/*.arm`
-- outputs: `test/output/*.asm`
+### 1) Restored the split-file architecture in `hw12_files/src`
+- `ArmToHack.h` keeps declarations only.
+- `ArmToHack.cpp` now contains all `ArmToHack::...` method definitions.
+
+### 2) Kept the `main.cpp` path correction
+- Input paths: `test/input/programX.arm`
+- Output paths: `test/output/programX.asm`
+
+This matches the current folder layout inside `hw12_files/test/`.
+
+### 3) Cleaned stale generated artifacts
+- Removed old generated files from `hw12_files/test/` root (`program*.asm`, `program*.arm.tmp`).
+- Kept canonical data under `hw12_files/test/input` and `hw12_files/test/output`.
+
+### 4) Rebuilt and re-ran translator
+- Build command succeeded with C++20.
+- Translator ran successfully for programs 1..10.
+
+### 5) Regression check against HW11 baseline
+- `diff -rq hw11_files/test/output hw12_files/test/output`
+- No differences reported.
+
+---
+
+
+## File map after Section 1
+- `src/ArmToHack.h` → class API declarations
+- `src/ArmToHack.cpp` → translator logic implementation
+- `src/main.cpp` → translation driver using `test/input` and `test/output`
+
+

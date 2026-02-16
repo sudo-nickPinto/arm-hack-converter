@@ -1,0 +1,9 @@
+		MOV		R0, #0
+		MOV		R1, #1
+		MOV		R2, #6
+		MOV		R6, #42
+		MOV		R7, #24
+		MOV		R8, #66
+		LDR		R3, [R2, R0, LSL #2]
+		LDR		R4, [R2, R1, LSL #2]
+		LDR		R5, [R2, #2]

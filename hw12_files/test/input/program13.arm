@@ -1,0 +1,5 @@
+		MOV		SP, #20
+		MOV		R1, #11
+		MOV		R2, #12
+		MOV		LR, #13
+		STMDA		SP!, {R2, LR, R1}

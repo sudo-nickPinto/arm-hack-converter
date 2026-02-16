@@ -1,0 +1,6 @@
+		MOV		R5, #11
+		MOV		R6, #12
+		MOV		R7, #13
+		MOV		R8, #14
+		MOV		SP, #5
+		LDMIB		SP!, {R1, R2, R3}

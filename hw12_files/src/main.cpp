@@ -22,6 +22,15 @@ int main() {
     // final test
     translator.translate("test/input/program10.arm", "test/output/program10.asm");
 
+    translator.translate("test/input/program11.arm", "test/output/program11.asm");
+    translator.translate("test/input/program12.arm", "test/output/program12.asm");
+    translator.translate("test/input/program13.arm", "test/output/program13.asm");
+    translator.translate("test/input/program14.arm", "test/output/program14.asm");
+    translator.translate("test/input/program15.arm", "test/output/program15.asm");
+    translator.translate("test/input/program16.arm", "test/output/program16.asm");
+    translator.translate("test/input/program17.arm", "test/output/program17.asm");
+    translator.translate("test/input/program18.arm", "test/output/program18.asm");
+
     cout << "Completed." << endl;
 
     return 0;

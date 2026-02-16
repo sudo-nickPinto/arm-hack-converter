@@ -1,0 +1,10 @@
+		MOV		SP, #25
+		MOV		R3, #18
+		MOV		R4, #0
+		MOV		R5, #1
+		MOV		R6, #42
+		MOV		R7, #24
+		MOV		R8, #66
+		STR		R6, [R3, R4, LSL #2]
+		STR		R7, [R3, R5, LSL #2]
+		STR		R8, [R3, #2]

@@ -24,6 +24,9 @@ private:
     // curr line number in HACK program (tracks ROM address)
     int line_number;
 
+    // default stack base
+    int default_sp_address = 256;
+
     // lookup table 1
     // Hashmap for associating registers with their addresses in RAM
     map<string, int> reg_map;

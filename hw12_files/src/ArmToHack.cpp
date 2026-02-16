@@ -87,6 +87,12 @@ void ArmToHack::translateFirstPass(string in_filename, string out_filename) {
 
     reset();
 
+    // initialize SP (R13) at translation start 
+    write_line("@" + to_string(default_sp_address));
+    write_line("D=A");
+    write_line("@13");
+    write_line("M=D");
+
     while (true) {
         // read next line
         string line = read_line(input_stream);
@@ -370,6 +376,194 @@ void ArmToHack::translateXXX(string line) {
         // D = M-D
         write_line("@" + to_string(rn));
         write_line("D=M-D");
+    }
+
+    if (opcode == "STMDA") {
+        // STMDA Rn!, {rs1, rs2, ...}
+        // For each listed rs:
+        // RAM[Rn] = rs
+        // Rn = Rn - 1
+
+        string rn_str = extract_token(line);
+
+        // remove '!''
+        strip(rn_str, "!");
+
+        int rn = reg_map[rn_str];
+
+        // parse  register list one token at a time
+        while (true) {
+            string rs_token = extract_token(line);
+            if (rs_token.empty()) break;
+
+            strip(rs_token, "{}");
+
+            int rs = reg_map[rs_token];
+
+            // D = rs
+            write_line("@" + to_string(rs));
+            write_line("D=M");
+
+            // RAM[Rn] = D
+            write_line("@" + to_string(rn));
+            write_line("A=M");
+            write_line("M=D");
+
+            // write-back after each store: Rn = Rn - 1
+            write_line("@" + to_string(rn));
+            write_line("M=M-1");
+        }
+    }
+
+    if (opcode == "LDMIB") {
+        // LDMIB Rn!, {rd1, rd2, ...}
+        // For each listed rd :
+        // Rn = Rn + 1
+        // rd = RAM[Rn]
+
+        string rn_str = extract_token(line);
+
+        // remove '!'
+        strip(rn_str, "!");
+
+        int rn = reg_map[rn_str];
+
+        // parse and process full register list one token at a time
+        while (true) {
+            string rd_token = extract_token(line);
+            if (rd_token.empty()) break;
+
+            strip(rd_token, "{}");
+
+            int rd = reg_map[rd_token];
+
+            // increment before load
+            write_line("@" + to_string(rn));
+            write_line("M=M+1");
+
+            // D = RAM[Rn]
+            write_line("A=M");
+            write_line("D=M");
+
+            // rd = D
+            write_line("@" + to_string(rd));
+            write_line("M=D");
+
+            write_pcjump(rd_token);
+        }
+    }
+
+    if (opcode == "LDR") {
+        // LDR rd, [rb, ri, LSL #2]
+        // LDR rd, [rb, #+/-N]
+        // === rb + offset (ignore LSL as noted in your specification)
+
+        string rd_str = extract_token(line);
+        string rb_token = extract_token(line);
+        string off_token = extract_token(line);
+
+        strip(rb_token, "[]");
+        strip(off_token, "[]");
+
+        int rd = reg_map[rd_str];
+        int rb = reg_map[rb_token];
+
+        // D = rb
+        write_line("@" + to_string(rb));
+        write_line("D=M");
+
+        // D = rb + offset
+        if (!off_token.empty() && off_token[0] == '#') {
+            // literal offset: #N, #+N, #-N
+            string literal = off_token;
+            strip(literal, "#");
+            // negative offset case
+            if (!literal.empty() && literal[0] == '-') {
+                strip(literal, "-");
+                write_line("@" + literal);
+                write_line("D=D-A");
+            }
+            // positive offset case
+            else {
+                write_line("@" + literal);
+                write_line("D=D+A");
+            }
+        }
+        else {
+            // register offset
+            int ri = reg_map[off_token];
+            write_line("@" + to_string(ri));
+            write_line("D=D+M");
+        }
+
+        // D = RAM[rb + offset]
+        write_line("A=D");
+        write_line("D=M");
+
+        // rd = D
+        write_line("@" + to_string(rd));
+        write_line("M=D");
+
+        write_pcjump(rd_str);
+    }
+
+    if (opcode == "STR") {
+        // STR rs, [rb, ri, LSL #2]
+        // STR rs, [rb, #+/-N]
+
+        string rs_str = extract_token(line);
+        string rb_token = extract_token(line);
+        string off_token = extract_token(line);
+
+        strip(rb_token, "[]");
+        strip(off_token, "[]");
+
+        int rs = reg_map[rs_str];
+        int rb = reg_map[rb_token];
+
+        // save rs in temp arbitrary cell
+        write_line("@" + to_string(rs));
+        write_line("D=M");
+        write_line("@30001");
+        write_line("M=D");
+
+        // D = rb
+        write_line("@" + to_string(rb));
+        write_line("D=M");
+
+        // D = rb + offset
+        if (!off_token.empty() && off_token[0] == '#') {
+            // literal offset: #N, #+N, #-N
+            string literal = off_token;
+            strip(literal, "#");
+
+            if (!literal.empty() && literal[0] == '-') {
+                strip(literal, "-");
+                write_line("@" + literal);
+                write_line("D=D-A");
+            }
+            else {
+                write_line("@" + literal);
+                write_line("D=D+A");
+            }
+        }
+        else {
+            // register offset
+            int ri = reg_map[off_token];
+            write_line("@" + to_string(ri));
+            write_line("D=D+M");
+        }
+
+        // save effective address in arbitrary temp cell
+        write_line("@30000");
+        write_line("M=D");
+
+        // RAM[rb + offset] = rs
+        write_line("@30001");
+        write_line("D=M");
+        write_line("@30000");
+        write_line("A=M");
+        write_line("M=D");
     }
 
     if (opcode == "END") {
