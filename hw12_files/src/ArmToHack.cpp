@@ -26,6 +26,8 @@ ArmToHack::ArmToHack() {
 void ArmToHack::reset() {
     // clears data members in preparation for another translation
     line_number = 0;
+    var_address = 16;
+    var_map.clear();
     label_map.clear();  // clear labels from previous translation
     fix_map.clear();  // clear forward jump fix-ups from previous translation
 }
@@ -88,6 +90,7 @@ void ArmToHack::translateFirstPass(string in_filename, string out_filename) {
     reset();
 
     // initialize SP (R13) at translation start 
+    // SP = cell 256 per variable declaration in constants section of header file
     write_line("@" + to_string(default_sp_address));
     write_line("D=A");
     write_line("@13");
@@ -109,6 +112,14 @@ void ArmToHack::translateFirstPass(string in_filename, string out_filename) {
         // no label or END = translate
         string first = peek_first(line);
         string second = peek_second(line);
+
+        // storing array 
+        // jump to other method (not opcode instruction)
+        if (second == "DCD") {
+            translateDCD(line);
+            continue;
+        }
+
         if (second.empty() && first != "END") {
             label_map[first] = line_number;
             continue;
@@ -224,6 +235,41 @@ void ArmToHack::translateJumps(string line) {
     // conditional jump based on D register
     string jump_type = jump_map[opcode];
     write_line("D;" + jump_type);
+}
+
+void ArmToHack::translateDCD(string line) {
+
+    // in: arrName DCD value1 value2 ...
+    string var_name = extract_token(line);
+
+    // 'DCD' token (ignored)
+    string keyword = extract_token(line);
+
+    // e.g: numbers1 DCD ...
+    // at current var_address: var_map["numbers1"] = 16
+    if (!var_name.empty() && keyword == "DCD") {
+        var_map[var_name] = var_address;
+    }
+
+    // process each value
+    while (true) {
+        string value_token = extract_token(line);
+        if (value_token.empty()) break;
+
+        // optional
+        strip(value_token, "+");
+
+        // D = literal
+        write_line("@" + value_token);
+        write_line("D=A");
+
+        // RAM[next_var_address] = D
+        write_line("@" + to_string(var_address));
+        write_line("M=D");
+
+        // reserve next cell for next literal
+        var_address++;
+    }
 }
 
 void ArmToHack::translateXXX(string line) {
@@ -456,10 +502,33 @@ void ArmToHack::translateXXX(string line) {
     if (opcode == "LDR") {
         // LDR rd, [rb, ri, LSL #2]
         // LDR rd, [rb, #+/-N]
-        // === rb + offset (ignore LSL as noted in your specification)
+        // === rb + offset (ignore LSL as noted in specification)
+        
+        // LDR rd, =array
+
 
         string rd_str = extract_token(line);
         string rb_token = extract_token(line);
+
+        // if loading base address into var : rd <- baseAddr(arrName):
+        if (!rb_token.empty() && rb_token[0] == '=') {
+            // remove '=' to get the variable/array symbol name
+            strip(rb_token, "=");
+
+            // look up previously recorded base address from DCD pass
+            int base_address = var_map[rb_token]; // numbers1 -> baseAddr (e.g 16)
+            int rd = reg_map[rd_str]; // R1 -> RAM[1]
+
+            // rd = base_address
+            write_line("@" + to_string(base_address));
+            write_line("D=A");
+            write_line("@" + to_string(rd));
+            write_line("M=D");
+    
+            write_pcjump(rd_str);
+            return;
+        }
+
         string off_token = extract_token(line);
 
         strip(rb_token, "[]");
@@ -524,7 +593,7 @@ void ArmToHack::translateXXX(string line) {
         // save rs in temp arbitrary cell
         write_line("@" + to_string(rs));
         write_line("D=M");
-        write_line("@30001");
+        write_line("@3001");
         write_line("M=D");
 
         // D = rb
@@ -555,15 +624,110 @@ void ArmToHack::translateXXX(string line) {
         }
 
         // save effective address in arbitrary temp cell
-        write_line("@30000");
+        write_line("@3000");
         write_line("M=D");
 
         // RAM[rb + offset] = rs
-        write_line("@30001");
+        write_line("@3001");
         write_line("D=M");
-        write_line("@30000");
+        write_line("@3000");
         write_line("A=M");
         write_line("M=D");
+    }
+
+    if (opcode == "ASR") {
+        // ASR rd, rs, #1
+        // rd = floor(rs/2)
+        // work cell = SP + 1  (old R0)
+        // count cell = SP + 2  (old R1)
+
+        string rd_str = extract_token(line);      // dest register
+        string rs_str = extract_token(line);      // src register
+        string shift_token = extract_token(line); // expected #1
+
+        int rd = reg_map[rd_str];
+        int rs = reg_map[rs_str];
+
+        // temp_working_addr  stored at RAM[3002]
+        // temp_count_addr stored at RAM[3003]
+
+        // RAM[3002] = SP + 1
+        write_line("@13");
+        write_line("D=M");
+        write_line("@1");
+        write_line("D=D+A");
+        write_line("@3002");
+        write_line("M=D");
+
+        // RAM[3003] = SP + 2
+        write_line("@13");
+        write_line("D=M");
+        write_line("@2");
+        write_line("D=D+A");
+        write_line("@3003");
+        write_line("M=D");
+
+        // [SP+1] = rs (move src value into working cell)
+        write_line("@" + to_string(rs));
+        write_line("D=M");
+        write_line("@3002");
+        write_line("A=M");
+        write_line("M=D");
+
+        // [SP+2] = 0 (initialize result counter)
+        write_line("@0");
+        write_line("D=A");
+        write_line("@3003");
+        write_line("A=M");
+        write_line("M=D");
+
+        // At this moment, line_number points to the next emitted Hack line,
+        // which is where LOOP_CHECK condition will start.
+        int loop_check_line = line_number;
+
+        // From LOOP_CHECK to the final back-jump we save space for
+        // 20 lines where DONE lebel will be after mini-program
+        // after, we move result from [SP+2] into rd
+        int done_line = line_number + 20;
+
+        // LOOP_CHECK:
+        // D = [SP+1] - 2; if D < 0 jump to DONE
+        write_line("@3002");
+        write_line("A=M");
+        write_line("D=M");
+        write_line("@2");
+        write_line("D=D-A");
+        write_line("@" + to_string(done_line));
+        write_line("D;JLT");
+
+        // LOOP_BODY:
+        // [SP+1] = [SP+1] - 2
+        write_line("@3002");
+        write_line("A=M");
+        write_line("D=M");
+        write_line("@2");
+        write_line("D=D-A");
+        write_line("@3002");
+        write_line("A=M");
+        write_line("M=D");
+
+        // [SP+2] = [SP+2] + 1
+        write_line("@3003");
+        write_line("A=M");
+        write_line("M=M+1");
+
+        // go back to LOOP_CHECK condition
+        write_line("@" + to_string(loop_check_line));
+        write_line("0;JMP");
+        
+        // move result from [SP+2] into dest register
+        write_line("@3003");
+        write_line("A=M");
+        write_line("D=M");
+        write_line("@" + to_string(rd));
+        write_line("M=D");
+
+        write_pcjump(rd_str);
     }
 
     if (opcode == "END") {

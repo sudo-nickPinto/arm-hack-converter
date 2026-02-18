@@ -27,6 +27,10 @@ private:
     // default stack base
     int default_sp_address = 256;
 
+    // next free RAM cell for variables (DCD starts at idx 16)
+    int var_address = 16;
+
+
     // lookup table 1
     // Hashmap for associating registers with their addresses in RAM
     map<string, int> reg_map;
@@ -45,6 +49,10 @@ private:
     // we write @-1 as placeholder and record: fix_map[hack_line] = label and then
     // the second pass will fix these by looking up label_map[label]
     map<int, string> fix_map;
+    
+    // lookup table 5
+    // hashmap for variable/array name into RAM address
+    map<string, int> var_map;
 
 
     // methods
@@ -59,6 +67,7 @@ private:
     void translate(string line);
     void translateJumps(string line);
     void translateXXX(string line);
+    void translateDCD(string line);
 };
 
 #endif // ARMTOHACK_H

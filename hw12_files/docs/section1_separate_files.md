@@ -19,7 +19,6 @@ This section is only about project structure and reordering of behavior previous
 - Input paths: `test/input/programX.arm`
 - Output paths: `test/output/programX.asm`
 
-This matches the current folder layout inside `hw12_files/test/`.
 
 ### 3) Cleaned stale generated artifacts
 - Removed old generated files from `hw12_files/test/` root (`program*.asm`, `program*.arm.tmp`).

@@ -1,0 +1,49 @@
+numbers1	DCD		1, 2, 3, 4, 5, 6
+numbers2	DCD		0, 0, 0, 0, 0, 0
+		LDR		R1, =numbers1
+		LDR		R2, =numbers2
+		MOV		R3, #0
+		MOV		R4, #6
+
+		SUB		SP, SP, #4
+		STR		R4, [SP, #1]
+		STR		R3, [SP, #2]
+		STR		R2, [SP, #3]
+		STR		R1, [SP, #4]
+		BL		MYSTERY
+		ADD		SP, SP, #4
+		
+		END
+MYSTERY
+		STMDA		SP!, {R1, R2, R3, R4, R5, R6, FP, LR}
+		ADD		FP, SP, #12
+		LDR		R1, [FP, #0]
+		LDR		R2, [FP, #-1]
+		LDR		R3, [FP, #-2]
+		LDR		R4, [FP, #-3]
+		
+		CMP		R3, R4
+		BGE		RESTORE
+		
+		LDR		R5, [R1, R3, LSL #2]
+		MOV		R6, #0
+LOOP
+		CMP		R5, #0
+		BEQ		DONE
+		ADD		R6, R6, R5
+		SUB		R5, R5, #1
+		BAL		LOOP
+DONE
+		STR		R6, [R2, R3, LSL #2]
+		ADD		R3, R3, #1
+		
+		SUB		SP, SP, #4
+		STR		R4, [SP, #1]
+		STR		R3, [SP, #2]
+		STR		R2, [SP, #3]
+		STR		R1, [SP, #4]
+		BL		MYSTERY
+		ADD		SP, SP, #4
+RESTORE
+		LDMIB		SP!, {R1, R2, R3, R4, R5, R6, FP, LR}
+		MOV		PC, LR

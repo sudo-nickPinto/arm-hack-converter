@@ -1,0 +1,13 @@
+numbers1	DCD		1, 2, 3, 4
+numbers2	DCD		5
+numbers3	DCD		6, 7, 8
+		LDR		R1, =numbers1
+		LDR		R2, =numbers2
+		LDR		R3, =numbers3
+		LDR		R4, [R1, #0]
+		LDR		R5, [R1, #3]
+		LDR		R6, [R1, #4]
+		LDR		R7, [R2, #0]
+		LDR		R8, [R2, #-1]
+		LDR		R9, [R3, #-1]
+		LDR		R10, [R3, #1]

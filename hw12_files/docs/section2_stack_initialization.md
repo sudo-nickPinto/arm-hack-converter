@@ -16,7 +16,6 @@ In [src/ArmToHack.h](../src/ArmToHack.h):
 
 Rationale:
 - keeps the default in one place
-- easy to adjust later if your instructor expects another base
 
 ### 2) Inserted stack init at the beginning of first pass
 In [src/ArmToHack.cpp](../src/ArmToHack.cpp), inside `translateFirstPass(...)`, immediately after `reset()`:

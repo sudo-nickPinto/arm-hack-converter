@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "hw12-build-run",
+			"type": "shell",
+			"command": "cd /Users/nicholaspinto/Gettysburg/year3/assembly/final_assignment/hw12_files && g++ -std=c++20 src/main.cpp src/token_io.cpp src/ArmToHack.cpp -o translator_hw12 && ./translator_hw12",
+			"isBackground": false
+		},
+		{
+			"label": "hw12-translator-build-run",
+			"type": "shell",
+			"command": "cd /Users/nicholaspinto/Gettysburg/year3/assembly/final_assignment/hw12_files && g++ -std=c++20 src/main.cpp src/token_io.cpp src/ArmToHack.cpp -o translator_hw12 && ./translator_hw12",
+			"isBackground": false
+		}
+	]
+}

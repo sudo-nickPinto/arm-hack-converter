@@ -1,0 +1,3 @@
+numbers1	DCD		1, 2, 3, 4
+numbers2	DCD		5
+numbers3	DCD		6, 7, 8
